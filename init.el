@@ -12,6 +12,16 @@
      (end-of-buffer)
      (eval-print-last-sexp))))
 
+(setq create-lockfiles nil)
+(setq
+   backup-by-copying t      ; don't clobber symlinks
+   backup-directory-alist
+    '(("." . "~/.saves"))    ; don't litter my fs tree
+   delete-old-versions t
+   kept-new-versions 6
+   kept-old-versions 2
+   version-control t)       ; use versioned backups
+(tool-bar-mode -1)
 (defalias 'yes-or-no-p 'y-or-n-p)
 (global-set-key (kbd "RET") 'newline-and-indent)
 (global-set-key (kbd "C-;") `comment-or-uncomment-region)
@@ -81,7 +91,7 @@
 	(make-local-variable 'tab-width)
 	(set 'tab-width 2)
 	(auto-complete-mode t)
-	(autopair-mode)
+	(setq indent-tabs-mode nil)
 	)
 
 (add-hook 'coffee-mode-hook 'coffee-custom)
@@ -89,10 +99,20 @@
 (defun ruby-custom ()
 	"ruby-mode-hook"
 	(auto-complete-mode t)
-	(autopair-mode)
 	)
 (add-hook `ruby-mode-hook `ruby-custom)
 
+(defun js-custom ()
+	"js-mode-hook"
+	(auto-complete-mode t)
+	(setq indent-tabs-mode nil)
+	(setq tab-width 2)
+	(setq c-basic-offset 2)
+	(setq js-indent-level 2)
+	)
+
+(add-hook `js-mode-hook `js-custom)
+ 
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
@@ -119,16 +139,7 @@
 (line-number-mode 1)			; have line numbers and
 (column-number-mode 1)			; column numbers in the mode line
 
-(tool-bar-mode -1)			; no tool bar with icons
-(scroll-bar-mode -1)			; no scroll bars
-(unless (string-match "apple-darwin" system-configuration)
-  ;; on mac, there's always a menu bar drown, don't have it empty
-  (menu-bar-mode -1))
-
 ;; choose your own fonts, in a system dependant way
-(if (string-match "apple-darwin" system-configuration)
-    (set-face-font 'default "Monaco-13")
-  (set-face-font 'default "Monospace-10"))
 
 (global-hl-line-mode)			; highlight current line
 (global-linum-mode 1)			; add line numbers on the left
@@ -138,7 +149,7 @@
 
 ;; copy/paste with C-c and C-v and C-x, check out C-RET too
 (cua-mode)
-
+(set-face-font 'default "Monospace-10")
 ;; under mac, have Command as Meta and keep Option for localized input
 (when (string-match "apple-darwin" system-configuration)
   (setq mac-allow-anti-aliasing t)
@@ -213,15 +224,17 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(erc-modules (quote (autojoin button completion fill irccontrols list match menu move-to-prompt netsplit networks noncommands notifications readonly ring services stamp track))))
+ '(column-number-mode t)
+ '(cua-mode t nil (cua-base))
+ '(erc-modules (quote (autojoin button completion fill irccontrols list match menu move-to-prompt netsplit networks noncommands notifications readonly ring services stamp track)))
+ '(show-paren-mode t)
+ '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
-(require 'go-autocomplete)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
+ '(default ((t (:family "Droid Sans Mono" :foundry "unknown" :slant normal :weight normal :height 113 :width normal)))))
 (require 'auto-complete-config)
 (ac-config-default)
 (global-auto-complete-mode t)
