@@ -1,16 +1,21 @@
+(setq user-emacs-directory "~/.emacs.d")
 (setenv "PATH" (concat (getenv "PATH") ":/opt/boxen/homebrew/bin"))
-(setq exec-path (append exec-path '("/opt/boxen/homebrew/bin")))
+(setq exec-path (append '("/opt/boxen/homebrew/bin" "/opt/boxen/rbenv/shims") exec-path))
+(setq enh-ruby-program "/opt/boxen/rbenv/shims/ruby")
+(add-hook 'before-save-hook 'whitespace-cleanup)
 (require 'cl)				; common lisp goodies, loop
-(setq rbenv-installation-dir "/opt/boxen/rbenv")
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (add-to-list 'load-path "~/.emacs.d/")
+(add-to-list 'load-path "~/.emacs.d/elpa")
+(package-initialize)
 (setq-default tab-width 2)
 (unless (require 'el-get nil t)
-  (url-retrieve
-   "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
-   (lambda (s)
-     (end-of-buffer)
-     (eval-print-last-sexp))))
+	(url-retrieve
+	 "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
+	 (lambda (s)
+		 (end-of-buffer)
+		 (eval-print-last-sexp))))
+(setq minitest-default-env "SHOW_DOTS=1")
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 (global-set-key (kbd "RET") 'newline-and-indent)
@@ -19,80 +24,109 @@
 (global-set-key (kbd "C--") `text-scale-decrease)
 (show-paren-mode t)
 
+
 (setq package-archives
-          '(("gnu" . "http://elpa.gnu.org/packages/")
-            ("marmalade" . "http://marmalade-repo.org/packages/")
-            ("melpa" . "http://melpa.milkbox.net/packages/")))
+					'(("gnu" . "http://elpa.gnu.org/packages/")
+						("marmalade" . "http://marmalade-repo.org/packages/")
+						("melpa" . "http://melpa.milkbox.net/packages/")))
 ;; now either el-get is `require'd already, or have been `load'ed by the
 ;; el-get installer.
 
 ;; set local recipes
-(setq
- el-get-sources
- '((:name buffer-move			; have to add your own keys
-	  :after (lambda ()
-		   (global-set-key (kbd "<C-S-up>")     'buf-move-up)
-		   (global-set-key (kbd "<C-S-down>")   'buf-move-down)
-		   (global-set-key (kbd "<C-S-left>")   'buf-move-left)
-		   (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
+;; (setq
+;;  el-get-sources
+;;  '((:name buffer-move			; have to add your own keys
+;;		:after (lambda ()
+;;       (global-set-key (kbd "<C-S-up>")     'buf-move-up)
+;;       (global-set-key (kbd "<C-S-down>")   'buf-move-down)
+;;       (global-set-key (kbd "<C-S-left>")   'buf-move-left)
+;;       (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
 
-   (:name smex				; a better (ido like) M-x
-	  :after (lambda ()
-		   (setq smex-save-file "~/.emacs.d/.smex-items")
-		   (global-set-key (kbd "M-x") 'smex)
-		   (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
+;;   (:name smex				; a better (ido like) M-x
+;;		:after (lambda ()
+;;       (setq smex-save-file "~/.emacs.d/.smex-items")
+;;       (global-set-key (kbd "M-x") 'smex)
+;;       (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
 
-   (:name goto-last-change		; move pointer back to last change
-	  :after (lambda ()
-		   ;; when using AZERTY keyboard, consider C-x C-_
-		   (global-set-key (kbd "C-x C-/") 'goto-last-change)))))
+;;   (:name goto-last-change		; move pointer back to last change
+;;		:after (lambda ()
+;;       ;; when using AZERTY keyboard, consider C-x C-_
+;;       (global-set-key (kbd "C-x C-/") 'goto-last-change)))))
 
 ;; now set our own packages
-(setq
- my:el-get-packages
- '(el-get				; el-get is self-hosting
-   escreen            			; screen for emacs, C-\ C-h
-   php-mode-improved			; if you're into php...
-   switch-window			; takes over C-x o
-   auto-complete			; complete as you type with overlays
-   zencoding-mode			; http://www.emacswiki.org/emacs/ZenCoding
-   color-theme		                ; nice looking emacs
-   color-theme-tango))	                ; check out color-theme-solarized
+;; (setq
+;;  my:el-get-packages
+;;  '(el-get				; el-get is self-hosting
+;;   escreen									; screen for emacs, C-\ C-h
+;;   php-mode-improved			; if you're into php...
+;;   switch-window			; takes over C-x o
+;;   auto-complete			; complete as you type with overlays
+;;   zencoding-mode			; http://www.emacswiki.org/emacs/ZenCoding
+;;   color-theme										; nice looking emacs
+;;   color-theme-tango))									; check out color-theme-solarized
 ;;
 ;; Some recipes require extra tools to be installed
 ;;
 ;; Note: el-get-install requires git, so we know we have at least that.
 ;;
-(when (el-get-executable-find "svn")
-  (loop for p in '(psvn    		; M-x svn-status
-		   yasnippet		; powerful snippet mode
-		   )
-	do (add-to-list 'my:el-get-packages p)))
+;; (when (el-get-executable-find "svn")
+;;   (loop for p in '(psvn				; M-x svn-status
+;;        yasnippet		; powerful snippet mode
+;;        )
+;;   do (add-to-list 'my:el-get-packages p)))
 
-(setq my:el-get-packages
-      (append
-       my:el-get-packages
-       (loop for src in el-get-sources collect (el-get-source-name src))))
-(setq tab-width 2)
+;; (setq my:el-get-packages
+;;			(append
+;;       my:el-get-packages
+;;       (loop for src in el-get-sources collect (el-get-source-name src))))
+;(setq tab-width 2)
 ;; install new packages and init already installed packages
-(el-get 'sync my:el-get-packages)
+;(el-get 'sync my:el-get-packages)
 (defun coffee-custom ()
 	"coffee-mode-hook"
 	(make-local-variable 'tab-width)
 	(set 'tab-width 2)
 	(auto-complete-mode t)
-	(autopair-mode)
 	)
 
+
+(defun js-custom ()
+	"coffee-custmo"
+	(set 'tab-width 2)
+	(setq indent-tabs-mode nil)
+	(setq js-indent-level 2)
+ )
+(add-hook 'js-mode-hook 'js-custom)
 (add-hook 'coffee-mode-hook 'coffee-custom)
+(defconst my-c++-style
+	'("cc-mode"
+		(c-offsets-alist . ((innamespace . [0])))))
+(c-add-style "my-c++-style" my-c++-style)
+
+(defun custom-c++ ()
+	"c++ custom"
+	(setq indent-tabs-mode nil)
+	(setq c-basic-offset 4)
+	(auto-complete-mode 1)
+	(irony-mode 1)
+	(c-set-style "my-c++-style"))
+
+(add-hook 'c-mode-common-hook 'custom-c++)
+(add-hook 'c++-mode-hook 'custom-c++)
 
 (defun ruby-custom ()
 	"ruby-mode-hook"
 	(auto-complete-mode t)
-	(autopair-mode)
 	)
-(add-hook `ruby-mode-hook `ruby-custom)
+(add-hook 'ruby-mode-hook 'ruby-custom)
+(add-hook 'enh-ruby-mode-hook 'ruby-custom)
 
+(defun lua-custom()
+	"lua-custom-hook"
+	(auto-complete-mode t)
+	(setq indent-tabs-mode nil))
+
+(add-hook 'lua-mode-hook 'lua-custom)
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("\\.ru$" . ruby-mode))
@@ -110,8 +144,8 @@
 
 (add-hook 'rhtml-mode '(progn
 			 (setq tab-width 2
-			       indent-tabs-mode nil
-			       )
+						 indent-tabs-mode nil
+						 )
 			 ))
 
 ;; on to the visual settings
@@ -122,13 +156,13 @@
 (tool-bar-mode -1)			; no tool bar with icons
 (scroll-bar-mode -1)			; no scroll bars
 (unless (string-match "apple-darwin" system-configuration)
-  ;; on mac, there's always a menu bar drown, don't have it empty
-  (menu-bar-mode -1))
+	;; on mac, there's always a menu bar drown, don't have it empty
+	(menu-bar-mode -1))
 
 ;; choose your own fonts, in a system dependant way
 (if (string-match "apple-darwin" system-configuration)
-    (set-face-font 'default "Monaco-13")
-  (set-face-font 'default "Monospace-10"))
+		(set-face-font 'default "Monaco-13")
+	(set-face-font 'default "Monospace-10"))
 
 (global-hl-line-mode)			; highlight current line
 (global-linum-mode 1)			; add line numbers on the left
@@ -141,9 +175,9 @@
 
 ;; under mac, have Command as Meta and keep Option for localized input
 (when (string-match "apple-darwin" system-configuration)
-  (setq mac-allow-anti-aliasing t)
-  (setq mac-command-modifier 'meta)
-  (setq mac-option-modifier 'none))
+	(setq mac-allow-anti-aliasing t)
+	(setq mac-command-modifier 'meta)
+	(setq mac-option-modifier 'none))
 
 ;; Use the clipboard, pretty please, so that copy/paste "works"
 (setq x-select-enable-clipboard t)
@@ -159,12 +193,14 @@
 ;; was no unsaved changes in the corresponding buffer, just revert its
 ;; content to reflect what's on-disk.
 (global-auto-revert-mode 1)
+(require 'ansi-color)
 
 ;; M-x shell is a nice shell interface to use, let's make it colorful.  If
 ;; you need a terminal emulator rather than just a shell, consider M-x term
 ;; instead.
 (autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(add-hook 'term-mode 'ansi-color-for-comint-mode-on)
 
 ;; If you do use M-x term, you will notice there's line mode that acts like
 ;; emacs buffers, and there's the default char mode that will send your
@@ -200,12 +236,11 @@
 (global-set-key (kbd "C-x f") 'find-file-in-repository)
 ;; C-x C-j opens dired with the cursor right on the file you're editing
 (require 'dired-x)
-
 ;; full screen
 (defun fullscreen ()
-  (interactive)
-  (set-frame-parameter nil 'fullscreen
-		       (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
+	(interactive)
+	(set-frame-parameter nil 'fullscreen
+					 (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
 (global-set-key [f11] 'fullscreen)
 (global-set-key (kbd "C-x C-z") 'magit-status)
 (custom-set-variables
@@ -213,19 +248,23 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(erc-modules (quote (autojoin button completion fill irccontrols list match menu move-to-prompt netsplit networks noncommands notifications readonly ring services stamp track))))
+ '(custom-safe-themes (quote ("65ae93029a583d69a3781b26044601e85e2d32be8f525988e196ba2cb644ce6a" "9370aeac615012366188359cb05011aea721c73e1cb194798bc18576025cabeb" default)))
+ '(erc-modules (quote (autojoin button completion fill irccontrols list match menu move-to-prompt netsplit networks noncommands notifications readonly ring services stamp track)))
+ '(pivotal-api-token "b2cc843a05cc0f3114871e845f26a0c1"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(require 'go-autocomplete)
+(require 'auto-complete)
+(require 'yasnippet)
+(yas-global-mode 1)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
 (require 'auto-complete-config)
 (ac-config-default)
 (global-auto-complete-mode t)
-
+(add-to-list 'load-path (expand-file-name "~/src/irony-mode/elisp/"))
 (defun untabify-buffer ()
 	(interactive)
 	(untabify (point-min) (point-max)))
@@ -240,4 +279,11 @@
 	(untabify-buffer)
 	(delete-trailing-whitespace))
 
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(setq org-agenda-files (list "~/Code/org/work.org"
+														 "~/Code/org/home.org"))
 (global-set-key (kbd "C-c n") 'cleanup-buffer)
+;(setq auto-save-default nil)
+(require 'irony)
+(irony-enable 'ac)
