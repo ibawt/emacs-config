@@ -1,7 +1,7 @@
 (setq user-emacs-directory "~/.emacs.d")
-(setenv "PATH" (concat (getenv "PATH") ":/opt/boxen/homebrew/bin"))
-(setq exec-path (append '("/opt/boxen/homebrew/bin" "/opt/boxen/rbenv/shims") exec-path))
-(setq enh-ruby-program "/opt/boxen/rbenv/shims/ruby")
+(setenv "PATH" (concat (getenv "PATH") ":/opt/boxen/homebrew/shims"))
+(setq exec-path (append '("/opt/boxen/homebrew/bin" "/opt/boxen/homebrew/shims") exec-path))
+(setq enh-ruby-program "/opt/boxen/homebrew/shims/ruby")
 (add-hook 'before-save-hook 'whitespace-cleanup)
 (require 'cl)				; common lisp goodies, loop
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -10,11 +10,11 @@
 (package-initialize)
 (setq-default tab-width 2)
 (unless (require 'el-get nil t)
-	(url-retrieve
-	 "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
-	 (lambda (s)
-		 (end-of-buffer)
-		 (eval-print-last-sexp))))
+  (url-retrieve
+   "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
+   (lambda (s)
+     (end-of-buffer)
+     (eval-print-last-sexp))))
 (setq minitest-default-env "SHOW_DOTS=1")
 
 (defalias 'yes-or-no-p 'y-or-n-p)
@@ -22,13 +22,13 @@
 (global-set-key (kbd "C-;") `comment-or-uncomment-region)
 (global-set-key (kbd "C-+") `text-scale-increase)
 (global-set-key (kbd "C--") `text-scale-decrease)
+(global-set-key (kbd "<C-tab>") `company-complete)
 (show-paren-mode t)
-
+(add-hook 'after-init-hook 'global-company-mode)
 
 (setq package-archives
-					'(("gnu" . "http://elpa.gnu.org/packages/")
-						("marmalade" . "http://marmalade-repo.org/packages/")
-						("melpa" . "http://melpa.milkbox.net/packages/")))
+          '(("marmalade" . "http://marmalade-repo.org/packages/")
+            ("melpa" . "http://melpa.milkbox.net/packages/")))
 ;; now either el-get is `require'd already, or have been `load'ed by the
 ;; el-get installer.
 
@@ -83,48 +83,40 @@
 ;; install new packages and init already installed packages
 ;(el-get 'sync my:el-get-packages)
 (defun coffee-custom ()
-	"coffee-mode-hook"
-	(make-local-variable 'tab-width)
-	(set 'tab-width 2)
-	(auto-complete-mode t)
-	)
+  "coffee-mode-hook"
+  (make-local-variable 'tab-width)
+  (set 'tab-width 2)
+  )
 
 
 (defun js-custom ()
-	"coffee-custmo"
-	(set 'tab-width 2)
-	(setq indent-tabs-mode nil)
-	(setq js-indent-level 2)
+  "coffee-custmo"
+  (set 'tab-width 2)
+  (setq indent-tabs-mode nil)
+  (setq js-indent-level 2)
  )
 (add-hook 'js-mode-hook 'js-custom)
 (add-hook 'coffee-mode-hook 'coffee-custom)
-(defconst my-c++-style
-	'("cc-mode"
-		(c-offsets-alist . ((innamespace . [0])))))
-(c-add-style "my-c++-style" my-c++-style)
 
 (defun custom-c++ ()
-	"c++ custom"
-	(setq indent-tabs-mode nil)
-	(setq c-basic-offset 4)
-	(auto-complete-mode 1)
-	(irony-mode 1)
-	(c-set-style "my-c++-style"))
+  "c++ custom"
+  (setq indent-tabs-mode nil)
+  (c-set-offset 'inextern-lang 0)
+  (setq c-basic-offset 4))
+
 
 (add-hook 'c-mode-common-hook 'custom-c++)
 (add-hook 'c++-mode-hook 'custom-c++)
 
 (defun ruby-custom ()
-	"ruby-mode-hook"
-	(auto-complete-mode t)
-	)
+  "ruby-mode-hook"
+  (minitest-mode)
+  )
 (add-hook 'ruby-mode-hook 'ruby-custom)
-(add-hook 'enh-ruby-mode-hook 'ruby-custom)
 
 (defun lua-custom()
-	"lua-custom-hook"
-	(auto-complete-mode t)
-	(setq indent-tabs-mode nil))
+  "lua-custom-hook"
+  (setq indent-tabs-mode nil))
 
 (add-hook 'lua-mode-hook 'lua-custom)
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
@@ -138,15 +130,15 @@
 
 (setq indent-tabs-mode nil)
 (add-hook 'html-mode '(progn
-			(setq sgml-basic-offset 2)
-			(setq indent-tabs-mode nil)
+      (setq sgml-basic-offset 2)
+      (setq indent-tabs-mode nil)
 ))
 
 (add-hook 'rhtml-mode '(progn
-			 (setq tab-width 2
-						 indent-tabs-mode nil
-						 )
-			 ))
+       (setq tab-width 2
+             indent-tabs-mode nil
+             )
+       ))
 
 ;; on to the visual settings
 (setq inhibit-splash-screen t)		; no splash screen, thanks
@@ -156,15 +148,11 @@
 (tool-bar-mode -1)			; no tool bar with icons
 (scroll-bar-mode -1)			; no scroll bars
 (unless (string-match "apple-darwin" system-configuration)
-	;; on mac, there's always a menu bar drown, don't have it empty
-	(menu-bar-mode -1))
+  ;; on mac, there's always a menu bar drown, don't have it empty
+  (menu-bar-mode -1))
 
 ;; choose your own fonts, in a system dependant way
-(if (string-match "apple-darwin" system-configuration)
-		(set-face-font 'default "Monaco-13")
-	(set-face-font 'default "Monospace-10"))
-
-(global-hl-line-mode)			; highlight current line
+(set-face-font 'default "SourceCodePro-Regular-13")
 (global-linum-mode 1)			; add line numbers on the left
 
 ;; avoid compiz manager rendering bugs
@@ -175,9 +163,9 @@
 
 ;; under mac, have Command as Meta and keep Option for localized input
 (when (string-match "apple-darwin" system-configuration)
-	(setq mac-allow-anti-aliasing t)
-	(setq mac-command-modifier 'meta)
-	(setq mac-option-modifier 'none))
+  (setq mac-allow-anti-aliasing t)
+  (setq mac-command-modifier 'meta)
+  (setq mac-option-modifier 'none))
 
 ;; Use the clipboard, pretty please, so that copy/paste "works"
 (setq x-select-enable-clipboard t)
@@ -195,28 +183,6 @@
 (global-auto-revert-mode 1)
 (require 'ansi-color)
 
-;; M-x shell is a nice shell interface to use, let's make it colorful.  If
-;; you need a terminal emulator rather than just a shell, consider M-x term
-;; instead.
-(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-(add-hook 'term-mode 'ansi-color-for-comint-mode-on)
-
-;; If you do use M-x term, you will notice there's line mode that acts like
-;; emacs buffers, and there's the default char mode that will send your
-;; input char-by-char, so that curses application see each of your key
-;; strokes.
-;;
-;; The default way to toggle between them is C-c C-j and C-c C-k, let's
-;; better use just one key to do the same.
-(require 'term)
-(define-key term-raw-map  (kbd "C-'") 'term-line-mode)
-(define-key term-mode-map (kbd "C-'") 'term-char-mode)
-
-;; Have C-y act as usual in term-mode, to avoid C-' C-y C-'
-;; Well the real default would be C-c C-j C-y C-c C-k.
-(define-key term-raw-map  (kbd "C-y") 'term-paste)
-
 ;; use ido for minibuffer completion
 (require 'ido)
 (ido-mode t)
@@ -233,14 +199,14 @@
 (global-set-key (kbd "C-x C-b") 'ido-switch-buffer)
 (global-set-key (kbd "C-x C-c") 'ido-switch-buffer)
 (global-set-key (kbd "C-x B") 'ibuffer)
-(global-set-key (kbd "C-x f") 'find-file-in-repository)
+(global-set-key (kbd "C-x f") 'helm-browse-project)
 ;; C-x C-j opens dired with the cursor right on the file you're editing
 (require 'dired-x)
 ;; full screen
 (defun fullscreen ()
-	(interactive)
-	(set-frame-parameter nil 'fullscreen
-					 (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
+  (interactive)
+  (set-frame-parameter nil 'fullscreen
+           (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
 (global-set-key [f11] 'fullscreen)
 (global-set-key (kbd "C-x C-z") 'magit-status)
 (custom-set-variables
@@ -248,42 +214,52 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("65ae93029a583d69a3781b26044601e85e2d32be8f525988e196ba2cb644ce6a" "9370aeac615012366188359cb05011aea721c73e1cb194798bc18576025cabeb" default)))
+ '(column-number-mode t)
+ '(cua-mode t nil (cua-base))
+ '(custom-safe-themes (quote ("f41fd682a3cd1e16796068a2ca96e82cfd274e58b978156da0acce4d56f2b0d5" "a3d519ee30c0aa4b45a277ae41c4fa1ae80e52f04098a2654979b1ab859ab0bf" "65ae93029a583d69a3781b26044601e85e2d32be8f525988e196ba2cb644ce6a" "9370aeac615012366188359cb05011aea721c73e1cb194798bc18576025cabeb" default)))
  '(erc-modules (quote (autojoin button completion fill irccontrols list match menu move-to-prompt netsplit networks noncommands notifications readonly ring services stamp track)))
- '(pivotal-api-token "b2cc843a05cc0f3114871e845f26a0c1"))
+ '(pivotal-api-token "b2cc843a05cc0f3114871e845f26a0c1")
+ '(show-paren-mode t)
+ '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(require 'auto-complete)
 (require 'yasnippet)
 (yas-global-mode 1)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-(require 'auto-complete-config)
-(ac-config-default)
-(global-auto-complete-mode t)
-(add-to-list 'load-path (expand-file-name "~/src/irony-mode/elisp/"))
+
 (defun untabify-buffer ()
-	(interactive)
-	(untabify (point-min) (point-max)))
+  (interactive)
+  (untabify (point-min) (point-max)))
 (defun indent-buffer ()
-	(interactive)
-	(indent-region (point-min) (point-max)))
+  (interactive)
+  (indent-region (point-min) (point-max)))
 
 (defun cleanup-buffer ()
-	"Clean the whitespace of a buffer"
-	(interactive)
-	(indent-buffer)
-	(untabify-buffer)
-	(delete-trailing-whitespace))
+  "Clean the whitespace of a buffer"
+  (interactive)
+  (indent-buffer)
+  (untabify-buffer)
+  (delete-trailing-whitespace))
 
-(global-set-key (kbd "C-c l") 'org-store-link)
-(global-set-key (kbd "C-c a") 'org-agenda)
+(require 'helm-ls-git)
 (setq org-agenda-files (list "~/Code/org/work.org"
-														 "~/Code/org/home.org"))
+                             "~/Code/org/home.org"))
 (global-set-key (kbd "C-c n") 'cleanup-buffer)
-;(setq auto-save-default nil)
-(require 'irony)
-(irony-enable 'ac)
+(load-theme 'base16-railscasts)
+ (defun gtags-root-dir ()
+    "Returns GTAGS root directory or nil if doesn't exist."
+    (with-temp-buffer
+      (if (zerop (call-process "global" nil t nil "-pr"))
+          (buffer-substring (point-min) (1- (point-max)))
+        nil)))
+(defun gtags-update ()
+  "Make GTAGS incremental update"
+  (call-process "global" nil nil nil "-u"))
+(defun gtags-update-hook ()
+  (when (gtags-root-dir)
+    (gtags-update)))
+
+(add-hook 'after-save-hook #'gtags-update-hook)
